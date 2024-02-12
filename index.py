@@ -6,7 +6,7 @@ import json
 from flask_cors import CORS
 
 # Jiang 的数字花园 ID
-HEPTABASE_WHITEBOARD_ID = 'd4cc3728297609add1a00aab108e90c4e57a1c378cfc2307c251745bf7d2a884'
+HEPTABASE_WHITEBOARD_ID = 'd63aeb7e4704beae2c3f8f343b7fff491d76d41ee3199c78d4c4115b70c5f83b'
 
 # 存储 heptabase base 数据
 HEPTABASE_DATA = {'result': 'erro', 'data': {}, 'time': ''}
