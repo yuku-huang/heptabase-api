@@ -1,0 +1,52 @@
+name: Sync Heptabase Images
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 18 * * 0"
+
+permissions:
+  contents: write
+
+jobs:
+  sync-images:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Download images from Heptabase
+        env:
+          HEPTABASE_WHITEBOARD_ID: ${{ secrets.HEPTABASE_WHITEBOARD_ID }}
+        run: |
+          if [ -z "$HEPTABASE_WHITEBOARD_ID" ]; then
+            echo "Missing HEPTABASE_WHITEBOARD_ID secret."
+            exit 1
+          fi
+          python scripts/download_heptabase_images.py \
+            --whiteboard-id "$HEPTABASE_WHITEBOARD_ID" \
+            --output-dir heptabase-assets \
+            --manifest heptabase-images-manifest.json \
+            --rewrite-output data.with_local_images.json \
+            --local-prefix "./heptabase-assets"
+
+      - name: Commit and push if changed
+        run: |
+          if git diff --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "GitHub Actions"
+          git add heptabase-assets heptabase-images-manifest.json data.with_local_images.json
+          git commit -m "chore: sync Heptabase images"
+          git push
